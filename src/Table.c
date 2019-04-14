@@ -50,6 +50,13 @@ int add_User(Table_t *table, User_t *user) {
         table->capacity += EXT_LEN;
     }
     idx = table->len;
+
+    // check whether the id of data already exists
+	for (size_t i=0; i<idx; i++) {
+		if(table->users[i].id == user->id)
+			return 0;
+	}
+
     memcpy((table->users)+idx, user, sizeof(User_t));
     table->cache_map[idx] = 1;
     table->len++;
