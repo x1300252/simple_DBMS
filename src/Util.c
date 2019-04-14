@@ -120,6 +120,9 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     return ret;
 }
 
+///
+/// The return value is the number of columns in the result.
+///
 
 int parse_select_cmd (Command_t *cmd, int *offset, int *limit) {
 	int fields_len = 0;
