@@ -50,7 +50,7 @@ int parse_input(char *input, Command_t *cmd) {
     }
     while (token != NULL) {
         add_Arg(cmd, token);
-        token = strtok(NULL, " \n");
+        token = strtok(NULL, ", \n");
     }
     return cmd->type;
 }
