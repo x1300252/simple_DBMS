@@ -152,9 +152,13 @@ int parse_select_cmd (Command_t *cmd, int *offset, int *limit) {
 ///
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     size_t idx;
-    for (idx = 0; idx < table->len; idx++) {
+    int offset, limit, fields_len;
+    fields_len = parse_select_cmd(cmd, &offset, &limit);
+
+    for (idx = offset; idx < table->len && idx < offset+limit; idx++) {
         print_user(get_User(table, idx));
     }
+
     cmd->type = SELECT_CMD;
     return table->len;
 }
