@@ -124,7 +124,7 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int parse_select_cmd (Command_t *cmd, int *offset, int *limit) {
 	int fields_len = 0;
 	*offset = 0;
-	*limit = 0;
+	*limit = -1;
 	for (size_t idx=1; idx<cmd->args_len; idx++) {
 		if (!strcmp(cmd->args[idx], "offset")) {
 			idx++;
@@ -152,12 +152,43 @@ int parse_select_cmd (Command_t *cmd, int *offset, int *limit) {
 ///
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     size_t idx;
-    int offset, limit, fields_len;
+    int offset, limit, fields_len, rows_num;
     fields_len = parse_select_cmd(cmd, &offset, &limit);
 
-    for (idx = offset; idx < table->len && idx < offset+limit; idx++) {
-        print_user(get_User(table, idx));
-    }
+    if (limit == -1 || limit+offset > table->len) {
+		rows_num = table->len;
+	}
+	else {
+		rows_num = limit+offset;
+	}
+
+
+    if (!fields_len) {
+		for (idx = offset; idx < rows_num; idx++) {
+		    print_user(get_User(table, idx));
+		}
+	}
+	else  {
+		fields_len++;
+		for (idx = offset; idx < rows_num; idx++) {
+		    printf("(");
+			User_t *user = get_User(table, idx);
+			for (size_t i=1; i<fields_len; i++) {
+				if (i != 1)
+					printf(", ");
+
+				if (!strcmp(cmd->args[i], "id"))
+					printf("%d", user->id);
+				else if (!strcmp(cmd->args[i], "name"))
+					printf("%s", user->name);
+				else if (!strcmp(cmd->args[i], "email"))
+					printf("%s", user->email);
+				else if (!strcmp(cmd->args[i], "age"))
+					printf("%d", user->age);
+			}
+			printf(")\n");
+		}
+	}
 
     cmd->type = SELECT_CMD;
     return table->len;
