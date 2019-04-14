@@ -120,6 +120,31 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     return ret;
 }
 
+
+int parse_select_cmd (Command_t *cmd, int *offset, int *limit) {
+	int fields_len = 0;
+	*offset = 0;
+	*limit = 0;
+	for (size_t idx=1; idx<cmd->args_len; idx++) {
+		if (!strcmp(cmd->args[idx], "offset")) {
+			idx++;
+			*offset = atoi(cmd->args[idx]);
+		}
+		else if (!strcmp(cmd->args[idx], "limit")) {
+			idx++;
+			*limit = atoi(cmd->args[idx]);
+		}
+		else if (!strcmp(cmd->args[idx], "from")) {
+			idx++;
+		}
+		else if (strcmp(cmd->args[idx], "*")) {
+			fields_len++;		
+		}
+	}
+	return fields_len;
+}
+
+
 ///
 /// The return value is the number of rows select from table
 /// If the select operation success, then change the input arg
