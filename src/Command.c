@@ -9,6 +9,8 @@ CMD_t cmd_list[] = {
     { ".help", 5, BUILT_IN_CMD },
     { "insert", 6, QUERY_CMD },
     { "select", 6, QUERY_CMD },
+    { "update", 6, QUERY_CMD},
+    { "delete", 6, QUERY_CMD},
     { "", 0, UNRECOG_CMD },
 };
 
