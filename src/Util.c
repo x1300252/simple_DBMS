@@ -98,9 +98,14 @@ int parse_input(char *input, Command_t *cmd) {
         }
     }
     while (token != NULL) {
+        //puts(input);
         add_Arg(cmd, token);
         token = strtok(NULL, " ,\n");
     }
+    for (idx=0; idx<cmd->args_len; idx++) {
+        printf("%s\n", cmd->args[idx]);
+    }
+    printf("%d\n", cmd->args_len);
     return cmd->type;
 }
 

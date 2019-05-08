@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Command.h"
+#include "WhereState.h"
 
 CMD_t cmd_list[] = {
     { ".exit", 5, BUILT_IN_CMD },
@@ -53,8 +54,12 @@ int add_Arg(Command_t *cmd, const char *arg) {
         cmd->args = new_buf;
         cmd->args_cap += 5;
     }
-    cmd->args[cmd->args_len] = strdup(arg);
-    cmd->args_len++;
+    
+    int has_ope = check_operator(cmd, arg);
+    if (has_ope == -1) {
+        cmd->args[cmd->args_len] = strdup(arg);
+        cmd->args_len++;
+    }
     return 0;
 
 error:
