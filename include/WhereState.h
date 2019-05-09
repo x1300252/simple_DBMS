@@ -1,7 +1,13 @@
-#ifndef COND_STATE_H
-#define COND_STATE_H
+#ifndef WHERE_STATE_H
+#define WHERE_STATE_H
 
 #include "Command.h"
+
+typedef struct SelectCols {
+    int *idxList;
+    size_t idxListLen;
+} SelectCols_t;
+
 
 int search_operator(Command_t *cmd, char *arg);
 
