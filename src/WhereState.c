@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "WhereState.h"
+#include "Command.h"
 
 char *operators[6]= {"=", "!=", ">", "<", ">=", "<="};
 
 int check_operator(Command_t *cmd, char *arg) {
-    char *ope_ptr, *token, *str;
+    char *ope_ptr, *token;
     char *saveptr = NULL;
     int idx;
 

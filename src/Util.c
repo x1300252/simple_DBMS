@@ -9,6 +9,7 @@
 #include "Command.h"
 #include "Table.h"
 #include "SelectState.h"
+#include "UpdateState.h"
 
 ///
 /// Allocate State_t and initialize some attributes
@@ -102,10 +103,6 @@ int parse_input(char *input, Command_t *cmd) {
         add_Arg(cmd, token);
         token = strtok(NULL, " ,\n");
     }
-    for (idx=0; idx<cmd->args_len; idx++) {
-        printf("%s\n", cmd->args[idx]);
-    }
-    printf("%d\n", cmd->args_len);
     return cmd->type;
 }
 
@@ -195,6 +192,7 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
 
 int handle_update_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = UPDATE_CMD;
+    update_state_handler(table, cmd);
     return 0;
 }
 
