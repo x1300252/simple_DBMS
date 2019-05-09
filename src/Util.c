@@ -10,6 +10,7 @@
 #include "Table.h"
 #include "SelectState.h"
 #include "UpdateState.h"
+#include "DeleteState.h"
 
 ///
 /// Allocate State_t and initialize some attributes
@@ -198,6 +199,7 @@ int handle_update_cmd(Table_t *table, Command_t *cmd) {
 
 int handle_delete_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = DELETE_CMD;
+    delete_state_handler(table, cmd);
     return 0;
 }
 
