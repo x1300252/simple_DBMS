@@ -29,10 +29,10 @@ void update_state_handler(Table_t *table, Command_t *cmd) {
         cmd->type = UNRECOG_CMD;
         return;
     }
-    // if (cmd->args_len > 6
-    //         && !strncmp(cmd->args[arg_idx], "where", 5)) {
-        
-    // }
+    if (cmd->args_len > 6
+         && !strncmp(cmd->args[6], "where", 5)) {
+        where_state_handler(table, cmd, 7, &selectCols);
+    }
     
     if (!strncmp(cmd->args[3], "id", 2)) {
         update_id_handler(table, selectCols, atoi(cmd->args[5]));
