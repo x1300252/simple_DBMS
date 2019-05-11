@@ -53,11 +53,13 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
     int r_val;
     int idx;
     
+    select_cols->idxListLen = 0;
+    select_cols->idxList = (int*)malloc(sizeof(int) * table->len);
+    
     if ((arg_idx+2) > cmd->args_len) {
         cmd->type = UNRECOG_CMD;
         return;
     }
-    
 
     l_int_ope = NULL;
     l_str_ope = NULL;
@@ -90,7 +92,12 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             else if (!strcmp("age", cmd->args[arg_idx])) {
                 result = l_int_ope(table->users[idx].age, l_val);
             }
-            printf("%d %d\n", idx, result);
+            //printf("%d %d\n", idx, result);
+            
+            if (result) {
+                select_cols->idxList[select_cols->idxListLen] = idx;
+                select_cols->idxListLen++;
+            }
         }
         return;
     }
@@ -152,7 +159,11 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             }
             
             result = bit_ope(l_result, r_result);
-            printf("%d %d %d %d\n", idx, l_result, r_result, result);
+            //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+            if (result) {
+                select_cols->idxList[select_cols->idxListLen] = idx;
+                select_cols->idxListLen++;
+            }
         }
     }
     cmd->type = UNRECOG_CMD;
