@@ -6,7 +6,7 @@
 
 typedef struct SelectCols {
     int *idxList;
-    size_t idxListLen;
+    int idxListLen;
 } SelectCols_t;
 
 
