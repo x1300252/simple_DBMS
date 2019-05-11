@@ -10,7 +10,7 @@
 void update_state_handler(Table_t *table, Command_t *cmd) {
     SelectCols_t selectCols;
     selectCols.idxList = NULL;
-    selectCols.idxListLen = 0;
+    selectCols.idxListLen = -1;
     
     if (cmd->args_len < 6) {
         cmd->type = UNRECOG_CMD;
@@ -64,7 +64,7 @@ void update_id_handler(Table_t *table, SelectCols_t selectCols, int new_id) {
         }
     }
     
-    if (!selectCols.idxListLen && table->len == 1) {
+    if (selectCols.idxListLen == -1 && table->len == 1) {
         usr_ptr = get_User(table, 0);
         usr_ptr->id = new_id;
     }
@@ -78,7 +78,7 @@ void update_name_handler(Table_t *table, SelectCols_t selectCols, const char* ne
     size_t idx;
     User_t *usr_ptr;
     
-    if (!selectCols.idxListLen) {
+    if (selectCols.idxListLen == -1) {
         for (idx = 0; idx < table->len; idx++) {
             usr_ptr = get_User(table, idx);
             strncpy(usr_ptr->name, new_name, MAX_USER_NAME);
@@ -96,7 +96,7 @@ void update_email_handler(Table_t *table, SelectCols_t selectCols, const char* n
     size_t idx;
     User_t *usr_ptr;
     
-    if (!selectCols.idxListLen) {
+    if (selectCols.idxListLen == -1) {
         for (idx = 0; idx < table->len; idx++) {
             usr_ptr = get_User(table, idx);
             strncpy(usr_ptr->email, new_email, MAX_USER_EMAIL);
@@ -114,7 +114,7 @@ void update_age_handler(Table_t *table, SelectCols_t selectCols, int new_age) {
     size_t idx;
     User_t *usr_ptr;
     
-    if (!selectCols.idxListLen) {
+    if (selectCols.idxListLen == -1) {
         for (idx = 0; idx < table->len; idx++) {
             usr_ptr = get_User(table, idx);
             usr_ptr->age = new_age;
