@@ -70,10 +70,7 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             || !strncmp(cmd->args[arg_idx], "email", 3)) {
         l_str_ope = get_str_ope(cmd->args[arg_idx+1]);
     }
-    else {
-        cmd->type = UNRECOG_CMD;
-        return;
-    }
+    
     if (!l_int_ope && !l_str_ope) {
         cmd->type = UNRECOG_CMD;
         return;
@@ -95,7 +92,71 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             }
             printf("%d %d\n", idx, result);
         }
+        return;
     }
+    
+    int l_arg = arg_idx;
+    arg_idx += 3;
+    int r_arg = arg_idx+1;
+    if ((arg_idx+4) == cmd->args_len){
+        bit_ope = get_bit_ope(cmd->args[arg_idx]);
+        
+        if (bit_ope == NULL) {
+            cmd->type = UNRECOG_CMD;
+            return;
+        }
+        
+        arg_idx++;
+        r_int_ope = NULL;
+        r_str_ope = NULL;
+        if (!strncmp(cmd->args[arg_idx], "id", 2)
+                || !strncmp(cmd->args[arg_idx], "age", 3)) {
+            r_val = atoi(cmd->args[arg_idx+2]);
+            r_int_ope = get_int_ope(cmd->args[arg_idx+1]);
+        }
+        else if (!strncmp(cmd->args[arg_idx], "name", 2)
+                || !strncmp(cmd->args[arg_idx], "email", 3)) {
+            r_str_ope = get_str_ope(cmd->args[arg_idx+1]);
+        }
+        
+        if (!r_int_ope && !r_str_ope && !bit_ope) {
+            cmd->type = UNRECOG_CMD;
+            return;
+        }
+        
+        for (idx = 0; idx < table->len; idx++) {
+            if (!strcmp("id", cmd->args[l_arg])) {
+                l_result = l_int_ope(table->users[idx].id, l_val);
+            }
+            else if (!strcmp("name", cmd->args[l_arg])) {
+                l_result = l_str_ope(table->users[idx].name, cmd->args[l_arg+2]);
+            }
+            else if (!strcmp("email", cmd->args[l_arg])) {
+                l_result = l_str_ope(table->users[idx].email, cmd->args[l_arg+2]);
+            }
+            else if (!strcmp("age", cmd->args[l_arg])) {
+                l_result = l_int_ope(table->users[idx].age, l_val);
+            }
+            
+            if (!strcmp("id", cmd->args[r_arg])) {
+                r_result = r_int_ope(table->users[idx].id, r_val);
+            }
+            else if (!strcmp("name", cmd->args[r_arg])) {
+                r_result = r_str_ope(table->users[idx].name, cmd->args[r_arg+2]);
+            }
+            else if (!strcmp("email", cmd->args[r_arg])) {
+                r_result = r_str_ope(table->users[idx].email, cmd->args[r_arg+2]);
+            }
+            else if (!strcmp("age", cmd->args[r_arg])) {
+                r_result = r_int_ope(table->users[idx].age, r_val);
+            }
+            
+            result = bit_ope(l_result, r_result);
+            printf("%d %d %d %d\n", idx, l_result, r_result, result);
+        }
+    }
+    cmd->type = UNRECOG_CMD;
+    return;
 }
 
 int (*get_int_ope(const char* ope))(int a, int b) {
