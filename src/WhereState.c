@@ -45,7 +45,7 @@ int check_operator(Command_t *cmd, char *arg) {
     return -1;
 }
 
-void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols_t *select_cols) {
+void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     int l_result;
     int r_result;
     int result;
@@ -53,8 +53,8 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
     int r_val;
     int idx;
     
-    select_cols->idxListLen = 0;
-    select_cols->idxList = (int*)malloc(sizeof(int) * table->len);
+    cmd->select_cols.idxListLen = 0;
+    cmd->select_cols.idxList = (int*)malloc(sizeof(int) * table->len);
     
     if ((arg_idx+2) > cmd->args_len) {
         cmd->type = UNRECOG_CMD;
@@ -95,8 +95,8 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             //printf("%d %d\n", idx, result);
             
             if (result) {
-                select_cols->idxList[select_cols->idxListLen] = idx;
-                select_cols->idxListLen++;
+                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                cmd->select_cols.idxListLen++;
             }
         }
         return;
@@ -161,8 +161,8 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx, SelectCols
             result = bit_ope(l_result, r_result);
             //printf("%d %d %d %d\n", idx, l_result, r_result, result);
             if (result) {
-                select_cols->idxList[select_cols->idxListLen] = idx;
-                select_cols->idxListLen++;
+                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                cmd->select_cols.idxListLen++;
             }
         }
     }

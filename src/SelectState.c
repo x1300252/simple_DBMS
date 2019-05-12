@@ -39,6 +39,9 @@ void table_state_handler(Command_t *cmd, size_t arg_idx) {
         arg_idx++;
         if (arg_idx == cmd->args_len) {
             return;
+        } else if (!strncmp(cmd->args[arg_idx], "where", 5)) {
+            where_state_handler(cmd, arg_idx+1);
+            return;
         } else if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
             offset_state_handler(cmd, arg_idx+1);
             return;

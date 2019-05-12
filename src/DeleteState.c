@@ -8,9 +8,8 @@
 #include "DeleteState.h"
 
 void delete_state_handler(Table_t *table, Command_t *cmd) {
-    SelectCols_t selectCols;
-    selectCols.idxList = NULL;
-    selectCols.idxListLen = -1;
+    cmd->select_cols.idxList = NULL;
+    cmd->select_cols.idxListLen = -1;
     
     if (cmd->args_len < 3) {
         cmd->type = UNRECOG_CMD;
@@ -27,16 +26,16 @@ void delete_state_handler(Table_t *table, Command_t *cmd) {
     
     if (cmd->args_len > 4
             && !strncmp(cmd->args[3], "where", 5)) {
-        where_state_handler(table, cmd, 4, &selectCols);
+        where_state_handler(table, cmd, 4);
     }
 
-    if (selectCols.idxListLen > 0) {
+    if (cmd->select_cols.idxListLen > 0) {
         int idx;
-        for (idx=selectCols.idxListLen-1; idx>=0; idx--) {
-            delete_col(table, selectCols.idxList[idx]);
+        for (idx=cmd->select_cols.idxListLen-1; idx>=0; idx--) {
+            delete_col(table, cmd->select_cols.idxList[idx]);
         }
     }
-    else if (selectCols.idxListLen == -1) {
+    else if (cmd->select_cols.idxListLen == -1) {
         delete_all(table);
     }
 }
