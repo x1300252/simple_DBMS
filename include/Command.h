@@ -29,6 +29,11 @@ typedef struct SelectArgs {
     int limit;
 } SelectArgs_t;
 
+typedef struct SelectCols {
+    int *idxList;
+    int idxListLen;
+} SelectCols_t;
+
 typedef union {
     SelectArgs_t sel_args;
 } CmdArg_t;
@@ -39,6 +44,7 @@ typedef struct Command {
     size_t args_len;
     size_t args_cap;
     CmdArg_t cmd_args;
+    SelectCols_t select_cols;
 } Command_t;
 
 Command_t* new_Command();
