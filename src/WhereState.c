@@ -5,8 +5,7 @@
 #include "Command.h"
 #include "Table.h"
 
-char *operators[6]= {">=", "<=", "!=", "=", ">", "<"};
-
+const char *operators[6]= {">=", "<=", "!=", "=", ">", "<"};
 
 int (*l_int_ope)(int, int);
 int (*r_int_ope)(int, int);
