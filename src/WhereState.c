@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "WhereState.h"
+#include "SelectState.h"
 #include "Command.h"
 #include "Table.h"
 
@@ -63,6 +64,7 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
 
     l_int_ope = NULL;
     l_str_ope = NULL;
+    bit_ope = NULL;
     if (!strncmp(cmd->args[arg_idx], "id", 2)
             || !strncmp(cmd->args[arg_idx], "age", 3)) {
         l_val = atoi(cmd->args[arg_idx+2]);
@@ -78,7 +80,11 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
         return;
     }
     
-    if ((arg_idx+3) == cmd->args_len) {
+    if ((arg_idx+3) < cmd->args_len) {
+        bit_ope = get_bit_ope(cmd->args[arg_idx+3]);
+    }
+    
+    if (bit_ope == NULL) {
         for (idx = 0; idx < table->len; idx++) {
             if (!strcmp("id", cmd->args[arg_idx])) {
                 result = l_int_ope(table->users[idx].id, l_val);
@@ -99,34 +105,25 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
                 cmd->select_cols.idxListLen++;
             }
         }
-        return;
+        arg_idx += 3;
     }
-    
-    int l_arg = arg_idx;
-    arg_idx += 3;
-    int r_arg = arg_idx+1;
-    if ((arg_idx+4) == cmd->args_len){
-        bit_ope = get_bit_ope(cmd->args[arg_idx]);
-        
-        if (bit_ope == NULL) {
-            cmd->type = UNRECOG_CMD;
-            return;
-        }
-        
-        arg_idx++;
+    else {
+        int l_arg = arg_idx;
+        int r_arg = arg_idx+4;
+
         r_int_ope = NULL;
         r_str_ope = NULL;
-        if (!strncmp(cmd->args[arg_idx], "id", 2)
-                || !strncmp(cmd->args[arg_idx], "age", 3)) {
-            r_val = atoi(cmd->args[arg_idx+2]);
-            r_int_ope = get_int_ope(cmd->args[arg_idx+1]);
+        if (!strncmp(cmd->args[r_arg], "id", 2)
+                || !strncmp(cmd->args[r_arg], "age", 3)) {
+            r_val = atoi(cmd->args[r_arg+2]);
+            r_int_ope = get_int_ope(cmd->args[r_arg+1]);
         }
-        else if (!strncmp(cmd->args[arg_idx], "name", 2)
-                || !strncmp(cmd->args[arg_idx], "email", 3)) {
-            r_str_ope = get_str_ope(cmd->args[arg_idx+1]);
+        else if (!strncmp(cmd->args[r_arg], "name", 2)
+                || !strncmp(cmd->args[r_arg], "email", 3)) {
+            r_str_ope = get_str_ope(cmd->args[r_arg+1]);
         }
         
-        if (!r_int_ope && !r_str_ope && !bit_ope) {
+        if (!r_int_ope && !r_str_ope) {
             cmd->type = UNRECOG_CMD;
             return;
         }
@@ -165,8 +162,19 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
                 cmd->select_cols.idxListLen++;
             }
         }
+        arg_idx += 7;
     }
-    cmd->type = UNRECOG_CMD;
+    if (arg_idx < cmd->args_len) {
+        if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
+            offset_state_handler(cmd, arg_idx+1);
+            return;
+        } else if (!strncmp(cmd->args[arg_idx], "limit", 5)) {
+            limit_state_handler(cmd, arg_idx+1);
+            return;
+        }
+        cmd->type = UNRECOG_CMD;
+        return;
+    }
     return;
 }
 

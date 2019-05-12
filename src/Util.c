@@ -69,19 +69,19 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
         offset = 0;
     }
 
-    if (idxList) {
-        for (idx = offset; idx < idxListLen; idx++) {
-            if (limit != -1 && (idx - offset) >= limit) {
-                break;
-            }
-            print_user(get_User(table, idxList[idx]), &(cmd->cmd_args.sel_args));
-        }
-    } else {
+    if (idxListLen == -1) {
         for (idx = offset; idx < table->len; idx++) {
             if (limit != -1 && (idx - offset) >= limit) {
                 break;
             }
             print_user(get_User(table, idx), &(cmd->cmd_args.sel_args));
+        }
+    } else {
+        for (idx = offset; idx < idxListLen; idx++) {
+            if (limit != -1 && (idx - offset) >= limit) {
+                break;
+            }
+            print_user(get_User(table, idxList[idx]), &(cmd->cmd_args.sel_args));
         }
     }
 }
@@ -185,9 +185,9 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 ///
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
-    field_state_handler(cmd, 1);
+    field_state_handler(table, cmd, 1);
 
-    print_users(table, NULL, 0, cmd);
+    print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
     return table->len;
 }
 

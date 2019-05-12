@@ -29,14 +29,14 @@ void delete_state_handler(Table_t *table, Command_t *cmd) {
         where_state_handler(table, cmd, 4);
     }
 
-    if (cmd->select_cols.idxListLen > 0) {
+    if (cmd->select_cols.idxListLen == -1) {
+        delete_all(table);
+    }
+    else if (cmd->select_cols.idxListLen > 0) {
         int idx;
         for (idx=cmd->select_cols.idxListLen-1; idx>=0; idx--) {
             delete_col(table, cmd->select_cols.idxList[idx]);
         }
-    }
-    else if (cmd->select_cols.idxListLen == -1) {
-        delete_all(table);
     }
 }
 
