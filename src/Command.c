@@ -23,6 +23,8 @@ Command_t* new_Command() {
     cmd->args = NULL;
     cmd->args_len = 0;
     cmd->args_cap = 0;
+    cmd->select_cols.idxList = NULL;
+    cmd->select_cols.idxListLen = -1;
     return cmd;
 }
 
