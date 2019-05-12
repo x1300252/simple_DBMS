@@ -5,7 +5,7 @@
 #include "Command.h"
 #include "Table.h"
 
-char *operators[6]= {"=", "!=", ">", "<", ">=", "<="};
+char *operators[6]= {">=", "<=", "!=", "=", ">", "<"};
 
 
 int (*l_int_ope)(int, int);
@@ -14,8 +14,8 @@ int (*l_str_ope)(const char*, const char*);
 int (*r_str_ope)(const char*, const char*);
 int (*bit_ope)(int, int);
 
-int (*int_ope_arr[])(int, int) = {int_eq, int_neq, int_gt, int_lt, int_gte, int_lte};
-int (*str_ope_arr[])(const char*, const char*) = {str_eq, str_neq};
+int (*int_ope_arr[])(int, int) = {int_gte, int_lte, int_neq, int_eq, int_gt, int_lt};
+int (*str_ope_arr[])(const char*, const char*) = {str_neq, str_eq};
 
 int check_operator(Command_t *cmd, char *arg) {
     char *ope_ptr, *token;
@@ -79,6 +79,10 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
         cmd->type = UNRECOG_CMD;
         return;
     }
+    
+    // for(idx=0; idx<cmd->args_len; idx++) {
+    //     printf("%s\n", cmd->args[idx]);
+    // }
     
     if ((arg_idx+3) < cmd->args_len) {
         bit_ope = get_bit_ope(cmd->args[arg_idx+3]);
@@ -190,9 +194,9 @@ int (*get_int_ope(const char* ope))(int a, int b) {
 
 int (*get_str_ope(const char* ope))(const char* a, const char* b) {
     int idx;
-    for (idx = 0; idx < 2; idx++) {
+    for (idx = 2; idx < 4; idx++) {
         if (!strcmp(ope, operators[idx])) {
-            return str_ope_arr[idx];
+            return str_ope_arr[idx-2];
         }
     }
     return NULL;
