@@ -92,6 +92,7 @@ int add_select_field(Command_t *cmd, const char *argument) {
 ///
 void cleanup_Command(Command_t *cmd) {
     size_t idx;
+    //printf("%s\n", cmd->args[0]);
     for (idx = 0; idx < cmd->args_cap; idx++) {
         free(cmd->args[idx]);
         cmd->args[idx] = NULL;
@@ -104,6 +105,12 @@ void cleanup_Command(Command_t *cmd) {
         free(cmd->cmd_args.sel_args.fields);
         cmd->cmd_args.sel_args.fields = NULL;
         cmd->cmd_args.sel_args.fields_len = 0;
+    }
+    if (cmd->select_cols.idxList) {
+        //printf("aa\n");
+        free(cmd->select_cols.idxList);
+        cmd->select_cols.idxList = NULL;
+        cmd->select_cols.idxListLen = -1;
     }
     cmd->type = UNRECOG_CMD;
     cmd->args_len = 0;

@@ -31,7 +31,7 @@ typedef struct SelectArgs {
 
 typedef struct SelectCols {
     int *idxList;
-    int idxListLen;
+    size_t idxListLen;
 } SelectCols_t;
 
 typedef union {
