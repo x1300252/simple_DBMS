@@ -123,7 +123,7 @@ double aggr_func_avg (Table_t *table, Command_t *cmd, size_t idx) {
 
 int aggr_func_sum (Table_t *table, Command_t *cmd, size_t idx) {
     size_t i;
-    int sum;
+    int sum = 0;
     if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id", 2)) {
         if (cmd->select_cols.idxListLen == -1) {
             for (i = 0; i < table->len; i++) {
@@ -150,6 +150,6 @@ int aggr_func_sum (Table_t *table, Command_t *cmd, size_t idx) {
         cmd->type = UNRECOG_CMD;
         return -1;
     }
-    
+
     return sum;
 }
