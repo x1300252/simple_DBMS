@@ -24,7 +24,9 @@ extern CMD_t cmd_list[];
 
 typedef struct SelectArgs {
     char **fields;
+    char ** aggr_funcs;
     size_t fields_len;
+    size_t funcs_len;
     int offset;
     int limit;
 } SelectArgs_t;
@@ -50,6 +52,7 @@ typedef struct Command {
 Command_t* new_Command();
 int add_Arg(Command_t *cmd, const char *arg);
 int add_select_field(Command_t *cmd, const char *argument);
+int add_aggr_funcs(Command_t *cmd, const char *argument);
 void cleanup_Command(Command_t *cmd);
 
 #endif

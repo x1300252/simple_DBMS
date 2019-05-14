@@ -86,6 +86,23 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     }
 }
 
+void print_aggr_funcs (Table_t *table, Command_t *cmd) {
+    size_t idx;
+    size_t funcs_len = cmd->cmd_args.sel_args.funcs_len;
+    printf("(");
+    for (idx = 0; idx < funcs_len; idx++) {
+        if (idx > 0) printf(", ");
+        if (!strncmp(cmd->cmd_args.sel_args.aggr_funcs[idx], "count", 5)) {
+            printf("%d", aggr_func_count(table, cmd));
+        } else if (!strncmp(cmd->cmd_args.sel_args.aggr_funcs[idx], "avg", 3)) {
+            printf("%.3f", aggr_func_avg(table, cmd, idx));
+        } else if (!strncmp(cmd->cmd_args.sel_args.aggr_funcs[idx], "sum", 3)) {
+            printf("%d", aggr_func_sum(table, cmd, idx));
+        }
+    }
+    printf(")\n");
+}
+
 ///
 /// This function received an output argument
 /// Return: category of the command
@@ -102,7 +119,7 @@ int parse_input(char *input, Command_t *cmd) {
     while (token != NULL) {
         //puts(input);
         add_Arg(cmd, token);
-        token = strtok(NULL, " ,\n");
+        token = strtok(NULL, " ,()\n");
     }
     return cmd->type;
 }
@@ -186,8 +203,13 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(table, cmd, 1);
-
-    print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
+    
+    if (cmd->cmd_args.sel_args.funcs_len) {
+        print_aggr_funcs(table, cmd);
+    }
+    else {
+        print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
+    }
     return table->len;
 }
 

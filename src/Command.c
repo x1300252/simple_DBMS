@@ -90,6 +90,27 @@ int add_select_field(Command_t *cmd, const char *argument) {
 }
 
 ///
+/// Add aggr funcs
+///
+int add_aggr_funcs(Command_t *cmd, const char *argument) {
+    size_t funcs_len = cmd->cmd_args.sel_args.funcs_len;
+    char **buf = (char**)malloc(sizeof(char*) * (funcs_len+1));
+    if (buf == NULL) {
+        return 0;
+    }
+
+    if (cmd->cmd_args.sel_args.aggr_funcs) {
+        memcpy(buf, cmd->cmd_args.sel_args.aggr_funcs, sizeof(char*) * funcs_len);
+        free(cmd->cmd_args.sel_args.aggr_funcs);
+    }
+
+    cmd->cmd_args.sel_args.aggr_funcs = buf;
+    cmd->cmd_args.sel_args.aggr_funcs[funcs_len] = strdup(argument);
+    cmd->cmd_args.sel_args.funcs_len++;
+    return 1;
+}
+
+///
 /// Free the allocated arguments, but without free the argument buffer
 ///
 void cleanup_Command(Command_t *cmd) {
@@ -107,9 +128,18 @@ void cleanup_Command(Command_t *cmd) {
         free(cmd->cmd_args.sel_args.fields);
         cmd->cmd_args.sel_args.fields = NULL;
         cmd->cmd_args.sel_args.fields_len = 0;
+        
+        if (cmd->cmd_args.sel_args.funcs_len) {
+            for (idx = 0; idx < cmd->cmd_args.sel_args.funcs_len; idx++) {
+                free(cmd->cmd_args.sel_args.aggr_funcs[idx]);
+                cmd->cmd_args.sel_args.aggr_funcs[idx] = NULL;
+            }
+            free(cmd->cmd_args.sel_args.aggr_funcs);
+            cmd->cmd_args.sel_args.aggr_funcs = NULL;
+            cmd->cmd_args.sel_args.funcs_len = 0;
+        }
     }
     if (cmd->select_cols.idxList) {
-        //printf("aa\n");
         free(cmd->select_cols.idxList);
         cmd->select_cols.idxList = NULL;
         cmd->select_cols.idxListLen = -1;
