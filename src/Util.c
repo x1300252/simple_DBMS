@@ -89,6 +89,20 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
 void print_aggr_funcs (Table_t *table, Command_t *cmd) {
     size_t idx;
     size_t funcs_len = cmd->cmd_args.sel_args.funcs_len;
+    int limit = cmd->cmd_args.sel_args.limit;
+    int offset = cmd->cmd_args.sel_args.offset;
+    
+    if (offset > 0) {
+        printf("empty set\n");
+        offset = 0;
+        return;
+    }
+    
+    if (limit == 0) {
+        printf("empty set\n");
+        return;
+    }
+    
     printf("(");
     for (idx = 0; idx < funcs_len; idx++) {
         if (idx > 0) printf(", ");
