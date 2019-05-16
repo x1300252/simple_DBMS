@@ -57,7 +57,8 @@ int add_Arg(Command_t *cmd, const char *arg) {
         cmd->args_cap += 5;
     }
     
-    int has_ope = check_operator(cmd, arg);
+    int has_ope;
+    has_ope = check_operator(cmd, (char*)arg);
     if (has_ope == -1) {
         cmd->args[cmd->args_len] = strdup(arg);
         cmd->args_len++;
