@@ -93,13 +93,13 @@ void print_aggr_funcs (Table_t *table, Command_t *cmd) {
     int offset = cmd->cmd_args.sel_args.offset;
     
     if (offset > 0) {
-        printf("empty set\n");
+        //printf("empty set\n");
         offset = 0;
         return;
     }
     
     if (limit == 0) {
-        printf("empty set\n");
+        //printf("empty set\n");
         return;
     }
     
