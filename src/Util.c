@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdio_ext.h>
+// #include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -158,7 +158,7 @@ void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
                 if (dup2(fd, 1) == -1) {
                     state->saved_stdout = -1;
                 }
-                __fpurge(stdout); //This is used to clear the stdout buffer
+                fpurge(stdout); //This is used to clear the stdout buffer
             }
         }
     } else if (!strncmp(cmd->args[0], ".load", 5)) {
@@ -217,7 +217,6 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(table, cmd, 1);
-    
     if (cmd->cmd_args.sel_args.funcs_len) {
         print_aggr_funcs(table, cmd);
     }

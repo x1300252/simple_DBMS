@@ -14,6 +14,8 @@ typedef struct Table {
     unsigned char *cache_map;
     FILE *fp;
     char *file_name;
+
+
 } Table_t;
 
 Table_t *new_Table(char *file_name);
