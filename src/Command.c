@@ -25,6 +25,9 @@ Command_t* new_Command() {
     cmd->args_cap = 0;
     cmd->select_cols.idxList = NULL;
     cmd->select_cols.idxListLen = -1;
+    cmd->cmd_args.sel_args.join_id1_val = -1;
+    cmd->cmd_args.sel_args.join_id2_val = -1;
+    cmd->cmd_args.sel_args.is_join = 0;
     return cmd;
 }
 

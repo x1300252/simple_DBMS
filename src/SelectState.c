@@ -12,6 +12,7 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
     cmd->cmd_args.sel_args.funcs_len = 0;
     cmd->cmd_args.sel_args.limit = -1;
     cmd->cmd_args.sel_args.offset = -1;
+    cmd->cmd_args.sel_args.is_join = 0;
     while(arg_idx < cmd->args_len) {
         if (!strncmp(cmd->args[arg_idx], "*", 1)) {
             add_select_field(cmd, cmd->args[arg_idx]);
@@ -36,6 +37,12 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
         } else if (!strncmp(cmd->args[arg_idx], "from", 4)) {
             table_state_handler(table, cmd, arg_idx+1);
             return;
+        } else if (!strncmp(cmd->args[arg_idx], "join", 4 )) {
+            if (!strncmp(cmd->args[arg_idx + 5], "id1", 3)) {
+                cmd->cmd_args.sel_args.is_join = 1;
+            } else if (!strncmp(cmd->args[arg_idx + 5], "id2", 3)) {
+                cmd->cmd_args.sel_args.is_join = 2;
+            }
         }
          else {
             cmd->type = UNRECOG_CMD;

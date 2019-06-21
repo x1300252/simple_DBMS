@@ -29,6 +29,9 @@ typedef struct SelectArgs {
     size_t funcs_len;
     int offset;
     int limit;
+    int is_join; // 0 no join, 1 join on id1, 2 join on id2
+    int join_id1_val;
+    int join_id2_val;
 } SelectArgs_t;
 
 typedef struct SelectCols {

@@ -21,7 +21,7 @@ typedef struct Table {
     Like_t *likes;
     unsigned char *cache_map_like;
     
-    int *ids[];
+    int *ids;
 } Table_t;
 
 Table_t *new_Table(char *file_name);

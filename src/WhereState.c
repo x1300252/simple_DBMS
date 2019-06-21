@@ -46,15 +46,19 @@ int check_operator(Command_t *cmd, char *arg) {
 }
 
 void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
-    int l_result;
-    int r_result;
+    /*
+        About where with id1, id2 filter:
+        first we record the value of id1, id2 to join_id1_val, join_id2_val
+     */
+    int l_result = 0;
+    int r_result = 0;
     int result;
     int l_val;
     int r_val;
     int idx;
     
     cmd->select_cols.idxListLen = 0;
-    cmd->select_cols.idxList = (int*)malloc(sizeof(int) * table->len);
+    cmd->select_cols.idxList = (int*)malloc(sizeof(int) * (table->len*table->len_like));
     
     if ((arg_idx+2) > cmd->args_len) {
         cmd->type = UNRECOG_CMD;
@@ -65,7 +69,9 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     l_str_ope = NULL;
     bit_ope = NULL;
     if (!strncmp(cmd->args[arg_idx], "id", 2)
-            || !strncmp(cmd->args[arg_idx], "age", 3)) {
+            || !strncmp(cmd->args[arg_idx], "age", 3)
+            || !strncmp(cmd->args[arg_idx], "id1", 3)
+            || !strncmp(cmd->args[arg_idx], "id2", 3)) {
         l_val = atoi(cmd->args[arg_idx+2]);
         l_int_ope = get_int_ope(cmd->args[arg_idx+1]);
     }
@@ -73,7 +79,14 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
             || !strncmp(cmd->args[arg_idx], "email", 3)) {
         l_str_ope = get_str_ope(cmd->args[arg_idx+1]);
     }
-    
+
+    if (!strncmp(cmd->args[arg_idx], "id1", 3)) {
+        cmd->cmd_args.sel_args.join_id1_val = l_val;
+    }
+    else if (!strncmp(cmd->args[arg_idx], "id2", 3)) {
+        cmd->cmd_args.sel_args.join_id2_val = l_val;
+    }
+
     if (!l_int_ope && !l_str_ope) {
         cmd->type = UNRECOG_CMD;
         return;
@@ -100,12 +113,14 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
             }
             else if (!strcmp("age", cmd->args[arg_idx])) {
                 result = l_int_ope(table->users[idx].age, l_val);
+            } else if (!strcmp("id2", cmd->args[arg_idx])) {
+                result = 1;
+            } else if (!strcmp("id1", cmd->args[arg_idx])) {
+                result = 1;
             }
-            //printf("%d %d\n", idx, result);
-            
+
             if (result) {
-                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
-                cmd->select_cols.idxListLen++;
+                row_matched_update(idx, result, cmd, table);
             }
         }
         arg_idx += 3;
@@ -117,10 +132,20 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
         r_int_ope = NULL;
         r_str_ope = NULL;
         if (!strncmp(cmd->args[r_arg], "id", 2)
-                || !strncmp(cmd->args[r_arg], "age", 3)) {
+                || !strncmp(cmd->args[r_arg], "age", 3)
+                || !strncmp(cmd->args[r_arg], "id1", 3)
+                || !strncmp(cmd->args[r_arg], "id2", 3)) {
             r_val = atoi(cmd->args[r_arg+2]);
             r_int_ope = get_int_ope(cmd->args[r_arg+1]);
         }
+
+        if (!strncmp(cmd->args[r_arg], "id1", 3)) {
+            cmd->cmd_args.sel_args.join_id1_val = l_val;
+        }
+        else if (!strncmp(cmd->args[r_arg], "id2", 3)) {
+            cmd->cmd_args.sel_args.join_id2_val = l_val;
+        }
+
         else if (!strncmp(cmd->args[r_arg], "name", 2)
                 || !strncmp(cmd->args[r_arg], "email", 3)) {
             r_str_ope = get_str_ope(cmd->args[r_arg+1]);
@@ -143,6 +168,10 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
             }
             else if (!strcmp("age", cmd->args[l_arg])) {
                 l_result = l_int_ope(table->users[idx].age, l_val);
+            } else if (!strcmp("id2", cmd->args[l_arg])) {
+                l_result = 1;
+            } else if (!strcmp("id1", cmd->args[l_arg])) {
+                l_result = 1;
             }
             
             if (!strcmp("id", cmd->args[r_arg])) {
@@ -156,13 +185,16 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
             }
             else if (!strcmp("age", cmd->args[r_arg])) {
                 r_result = r_int_ope(table->users[idx].age, r_val);
+            } else if (!strcmp("id2", cmd->args[r_arg])) {
+                r_result = 1;
+            } else if (!strcmp("id1", cmd->args[r_arg])) {
+                r_result = 1;
             }
             
             result = bit_ope(l_result, r_result);
             //printf("%d %d %d %d\n", idx, l_result, r_result, result);
             if (result) {
-                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
-                cmd->select_cols.idxListLen++;
+                row_matched_update(idx, result, cmd, table);
             }
         }
         arg_idx += 7;
@@ -177,6 +209,76 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
         }
         cmd->type = UNRECOG_CMD;
         return;
+    }
+    return;
+}
+
+int get_like_col(Like_t like,int col_type) {
+    if (col_type == 1) {
+        return like.id1;
+    } else if (col_type == 2) {
+        return like.id2;
+    }
+    return -1;
+}
+
+void find_match_table(Table_t *table, int col_type,  int (*l_int_ope)(int, int), int l_val, int (*r_int_ope)(int, int), int r_val , int (*bit_ope)(int, int)) {
+    // TDOO: find if like has a match, if match add the count of matched likes, 
+    uint64_t l_result, r_result, count;
+    for (int i=0; i < table->len_like; i++) {
+        if (l_int_ope) {
+            l_result = l_int_ope(get_like_col(table->likes[i], col_type), l_val);
+            if (l_result) {
+                count++;
+            }
+        }
+        if (r_int_ope && l_int_ope) {
+            r_result = r_int_ope(get_like_col(table->likes[i], col_type), r_val);
+            // bit 
+            if (bit_ope(l_result, r_result)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+int is_joined(User_t  user, Like_t like, int join_field) {
+    // check if user is joined with a like
+    if (join_field == 1 && (user.id == like.id1)) {
+        return 1;
+    } else if (join_field == 2 && (user.id == like.id2)) {
+        return 1;
+    }
+    return 0;
+}
+
+int check_join_value(User_t user, Table_t *table, int check_field, int check_value, int join_field) {
+    int count;
+    // return the total count of matched value
+    for (int i=0; i< table->len_like; i++) {
+        if (is_joined(user, table->likes[i], join_field )) {
+            if (check_field == 1) {
+
+            } else if (check_field == 2) {
+
+            }
+
+        }
+    }
+}
+
+void row_matched_update(int idx, int result, Command_t *cmd, Table_t *table) {
+
+    if (cmd->cmd_args.sel_args.is_join != 0) {
+        if (cmd->cmd_args.sel_args.join_id2_val == -1 && cmd->cmd_args.sel_args.join_id1_val == -1) {
+            cmd->select_cols.idxListLen++; // add the amt of count in hash map
+        } else {
+            cmd->select_cols.idxListLen++; 
+        }
+    } else {
+        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+        cmd->select_cols.idxListLen++;
     }
     return;
 }
