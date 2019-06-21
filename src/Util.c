@@ -199,13 +199,28 @@ int handle_query_cmd(Table_t *table, Command_t *cmd) {
 ///
 int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     int ret = 0;
-    User_t *user = command_to_User(cmd);
-    if (user) {
-        ret = add_User(table, user);
-        if (ret > 0) {
-            cmd->type = INSERT_CMD;
+    if (cmd->args_len >= 5) {
+
+        if (!strncmp(cmd->args[2], "user", 4)) {
+            User_t *user = command_to_User(cmd);
+            if (user) {
+                ret = add_User(table, user);
+                if (ret > 0) {
+                    cmd->type = INSERT_CMD;
+                }
+            }
+        }
+        else if (!strncmp(cmd->args[2], "like", 4)) {
+            Like_t *like = command_to_Like(cmd);
+            if (like) {
+                ret = add_Like(table, like);
+                if (ret > 0) {
+                    cmd->type = INSERT_CMD;
+                }
+            }
         }
     }
+
     return ret;
 }
 

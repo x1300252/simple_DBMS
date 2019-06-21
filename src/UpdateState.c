@@ -16,7 +16,7 @@ void update_state_handler(Table_t *table, Command_t *cmd) {
         return;
     }
     
-    if (strncmp(cmd->args[1], "table", 5)) {
+    if (strncmp(cmd->args[1], "user", 5)) {
         cmd->type = UNRECOG_CMD;
         return;
     }

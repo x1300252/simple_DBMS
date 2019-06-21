@@ -19,7 +19,7 @@ void delete_state_handler(Table_t *table, Command_t *cmd) {
         cmd->type = UNRECOG_CMD;
         return;
     }
-    if (strncmp(cmd->args[2], "table", 5)) {
+    if (strncmp(cmd->args[2], "user", 5)) {
         cmd->type = UNRECOG_CMD;
         return;
     }

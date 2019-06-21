@@ -20,6 +20,10 @@ Table_t *new_Table(char *file_name) {
                             sizeof(Like_t) * INIT_TABLE_SIZE);
     table->cache_map = (unsigned char*)malloc(sizeof(char)*INIT_TABLE_SIZE);
     memset(table->cache_map, 0, sizeof(char)*INIT_TABLE_SIZE);
+
+    table->cache_map_like = (unsigned char*)malloc(sizeof(char)*INIT_TABLE_SIZE);
+    memset(table->cache_map_like, 0, sizeof(char)*INIT_TABLE_SIZE);
+
     table->fp = NULL;
     table->file_name = NULL;
     load_table(table, file_name);
