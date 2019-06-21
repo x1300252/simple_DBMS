@@ -1,5 +1,5 @@
 #include <stdio.h>
-// #include <stdio_ext.h>
+#include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -158,7 +158,7 @@ void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
                 if (dup2(fd, 1) == -1) {
                     state->saved_stdout = -1;
                 }
-                fpurge(stdout); //This is used to clear the stdout buffer
+                __fpurge(stdout); //This is used to clear the stdout buffer
             }
         }
     } else if (!strncmp(cmd->args[0], ".load", 5)) {
