@@ -1,0 +1,7 @@
+insert into like 1 2
+insert into like 2 3
+insert into like 4 2
+insert into like 3 2
+insert into like 5 1
+select * from like
+.exit

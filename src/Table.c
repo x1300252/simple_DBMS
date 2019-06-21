@@ -9,7 +9,7 @@
 ///
 Table_t *new_Table(char *file_name) {
     Table_t *table = (Table_t*)malloc(sizeof(Table_t));
-    memset((void*)table, 0, sizeof(Table_t));
+    // memset((void*)table, 0, sizeof(Table_t));
     table->capacity = INIT_TABLE_SIZE;
     table->len = 0;
     table->users = (User_t*)malloc(
@@ -23,7 +23,7 @@ Table_t *new_Table(char *file_name) {
 
     table->cache_map_like = (unsigned char*)malloc(sizeof(char)*INIT_TABLE_SIZE);
     memset(table->cache_map_like, 0, sizeof(char)*INIT_TABLE_SIZE);
-
+    
     table->fp = NULL;
     table->file_name = NULL;
     load_table(table, file_name);
@@ -84,13 +84,14 @@ int add_Like(Table_t *table, Like_t *like) {
     if (!table || !like) {
         return 0;
     }
+    
+
     // Check id doesn't exist in the table
-    for (idx = 0; idx < table->len_like; idx++) {
-        like_ptr = get_Like(table, idx);
-        if (like_ptr->id1 == like->id1) {
-            return 0;
-        }
+    if (index_id1.find(like->id1) != index_id1.end()) {
+        printf("aa\n");
+        return 0;
     }
+    
     if (table->len_like == table->capacity_like) {
         Like_t *new_like_buf = (Like_t*)malloc(sizeof(Like_t)*(table->len_like+EXT_LEN));
         unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->len_like+EXT_LEN));
@@ -111,6 +112,14 @@ int add_Like(Table_t *table, Like_t *like) {
     memcpy((table->likes)+idx, like, sizeof(Like_t));
     table->cache_map_like[idx] = 1;
     table->len_like++;
+    
+    if (index_id2.find(like->id2) != index_id2.end()) {
+        index_id2[like->id2] += 1;
+    }
+    else {
+        index_id2[like->id2] = 1;
+    }
+    index_id1[like->id1] = 1;
     return 1;
 }
 
