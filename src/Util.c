@@ -58,6 +58,29 @@ void print_user(User_t *user, SelectArgs_t *sel_args) {
 }
 
 ///
+/// Print the like in the specific format
+///
+void print_like(Like_t *like, SelectArgs_t *sel_args) {
+    size_t idx;
+    printf("(");
+    for (idx = 0; idx < sel_args->fields_len; idx++) {
+        if (!strncmp(sel_args->fields[idx], "*", 1)) {
+            printf("%d, %d", like->id1, like->id2);
+        } else {
+            if (idx > 0) printf(", ");
+
+            if (!strncmp(sel_args->fields[idx], "id1", 3)) {
+                printf("%d", like->id1);
+            } else if (!strncmp(sel_args->fields[idx], "id2", 3)) {
+                printf("%d", like->id2);
+            }
+        }
+    }
+    printf(")\n");
+}
+
+
+///
 /// Print the users for given offset and limit restriction
 ///
 void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
@@ -85,6 +108,36 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
         }
     }
 }
+
+///
+/// Print the likes for given offset and limit restriction
+///
+void print_likes(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
+    size_t idx;
+    int limit = cmd->cmd_args.sel_args.limit;
+    int offset = cmd->cmd_args.sel_args.offset;
+    if (offset == -1) {
+        offset = 0;
+    }
+
+    if (idxListLen == -1) {
+        for (idx = offset; idx < table->len_like; idx++) {
+
+            if (limit != -1 && (idx - offset) >= limit) {
+                break;
+            }
+            print_like(get_Like(table, idx), &(cmd->cmd_args.sel_args));
+        }
+    } else {
+        for (idx = offset; idx < idxListLen; idx++) {
+            if (limit != -1 && (idx - offset) >= limit) {
+                break;
+            }
+            print_like(get_Like(table, idxList[idx]), &(cmd->cmd_args.sel_args));
+        }
+    }
+}
+
 
 void print_aggr_funcs (Table_t *table, Command_t *cmd) {
     size_t idx;
@@ -236,7 +289,16 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
         print_aggr_funcs(table, cmd);
     }
     else {
-        print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
+        int table_name_idx = 0;
+        while(table_name_idx < cmd->args_len && strncmp(cmd->args[table_name_idx], "from", 4)) {
+            table_name_idx += 1;
+        }
+        if (!strncmp(cmd->args[table_name_idx+1], "user", 4)) {
+            print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
+        }
+        else if (!strncmp(cmd->args[table_name_idx+1], "like", 4)) {
+            print_likes(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
+        }
     }
     return table->len;
 }
