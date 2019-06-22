@@ -143,36 +143,48 @@ double aggr_func_avg (Table_t *table, Command_t *cmd, size_t idx) {
 int aggr_func_sum (Table_t *table, Command_t *cmd, size_t idx) {
     size_t i;
     int sum = 0;
-    if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id", 2)) {
-        if (cmd->select_cols.idxListLen == -1) {
-            for (i = 0; i < table->len; i++) {
-                sum += get_User(table, i)->id;
-            }
-        } else {
-            for (i = 0; i < cmd->select_cols.idxListLen; i++) {
-                sum += get_User(table, cmd->select_cols.idxList[i])->id;
+    if (cmd->cmd_args.sel_args.table_flag == 2) {
+        if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id1", 3)) {
+            for (i = 0; i < table->len_like; i++) {
+                sum += get_Like(table, i)->id1;
             }
         }
-    }
-    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "age", 3)) {
-       if (cmd->select_cols.idxListLen == -1) {
-            for (i = 0; i < table->len; i++) {
-                sum += get_User(table, i)->age;
-            }
-        } else {
-            for (i = 0; i < cmd->select_cols.idxListLen; i++) {
-                sum += get_User(table, cmd->select_cols.idxList[i])->age;
+        else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id2", 3)) {
+            for (i = 0; i < table->len_like; i++) {
+                sum += get_Like(table, i)->id2;
             }
         }
-    }
-    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id1", 3)) {
-        for (i = 0; i < table->len_like; i++) {
-            sum += get_Like(table, i)->id1;
+        else {
+            cmd->type = UNRECOG_CMD;
+            return -1;
         }
     }
-    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id2", 3)) {
-        for (i = 0; i < table->len_like; i++) {
-            sum += get_Like(table, i)->id2;
+    else if (cmd->cmd_args.sel_args.table_flag == 1) {
+        if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id", 2)) {
+            if (cmd->select_cols.idxListLen == -1) {
+                for (i = 0; i < table->len; i++) {
+                    sum += get_User(table, i)->id;
+                }
+            } else {
+                for (i = 0; i < cmd->select_cols.idxListLen; i++) {
+                    sum += get_User(table, cmd->select_cols.idxList[i])->id;
+                }
+            }
+        }
+        else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "age", 3)) {
+           if (cmd->select_cols.idxListLen == -1) {
+                for (i = 0; i < table->len; i++) {
+                    sum += get_User(table, i)->age;
+                }
+            } else {
+                for (i = 0; i < cmd->select_cols.idxListLen; i++) {
+                    sum += get_User(table, cmd->select_cols.idxList[i])->age;
+                }
+            }
+        }
+        else {
+            cmd->type = UNRECOG_CMD;
+            return -1;
         }
     }
     else {
