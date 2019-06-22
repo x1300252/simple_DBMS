@@ -38,13 +38,13 @@ Command_t* new_Command() {
 int add_Arg(Command_t *cmd, const char *arg) {
     char **new_buf;
     if (cmd->args == NULL) {
-        new_buf = (char **) malloc(sizeof(char*) * 5);
+        new_buf = (char **) malloc(sizeof(char*) * 7);
         if (new_buf == NULL)
             goto error;
 
         cmd->args = new_buf;
-        cmd->args_cap = 5;
-        memset((void*)cmd->args, 0, sizeof(char*) * 5);
+        cmd->args_cap = 7;
+        memset((void*)cmd->args, 0, sizeof(char*) * 7);
     } else if (cmd->args_cap == cmd->args_len) {
         new_buf = (char **) malloc(
                                 sizeof(char*) * (cmd->args_cap + 5));
@@ -60,12 +60,12 @@ int add_Arg(Command_t *cmd, const char *arg) {
         cmd->args_cap += 5;
     }
     
-    int has_ope;
-    has_ope = check_operator(cmd, (char*)arg);
-    if (has_ope == -1) {
+    // int has_ope;
+    // has_ope = check_operator(cmd, (char*)arg);
+    // if (has_ope == -1) {
         cmd->args[cmd->args_len] = strdup(arg);
         cmd->args_len++;
-    }
+    // }
     return 0;
 
 error:

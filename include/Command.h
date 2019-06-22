@@ -30,8 +30,12 @@ typedef struct SelectArgs {
     int offset;
     int limit;
     int is_join; // 0 no join, 1 join on id1, 2 join on id2
+<<<<<<< HEAD
     int join_id1_val;
     int join_id2_val;
+=======
+    int table_flag; // 1 for user, 2 for like
+>>>>>>> yx
 } SelectArgs_t;
 
 typedef struct SelectCols {

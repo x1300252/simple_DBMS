@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <gperftools/profiler.h>
 #include "Table.h"
+
+std::unordered_map<unsigned int, int> index_id1;
+std::unordered_map<unsigned int, int> index_id2;
+std::unordered_map<unsigned int, int> index_id;
 
 ///
 /// Allocate a Table_t struct, then initialize some attributes, and
@@ -9,7 +14,7 @@
 ///
 Table_t *new_Table(char *file_name) {
     Table_t *table = (Table_t*)malloc(sizeof(Table_t));
-    // memset((void*)table, 0, sizeof(Table_t));
+    memset((void*)table, 0, sizeof(Table_t));
     table->capacity = INIT_TABLE_SIZE;
     table->len = 0;
     table->users = (User_t*)malloc(
@@ -37,18 +42,17 @@ Table_t *new_Table(char *file_name) {
 /// return 1 when the data successfully add to table
 ///
 int add_User(Table_t *table, User_t *user) {
+    ProfilerStart("nameOfProfile.log");
     size_t idx;
     User_t *usr_ptr;
     if (!table || !user) {
         return 0;
     }
     // Check id doesn't exist in the table
-    for (idx = 0; idx < table->len; idx++) {
-        usr_ptr = get_User(table, idx);
-        if (usr_ptr->id == user->id) {
-            return 0;
-        }
+    if (index_id.find(user->id) != index_id.end()) {
+        return 0;
     }
+    
     if (table->len == table->capacity) {
         User_t *new_user_buf = (User_t*)malloc(sizeof(User_t)*(table->len+EXT_LEN));
         unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->len+EXT_LEN));
@@ -69,6 +73,8 @@ int add_User(Table_t *table, User_t *user) {
     memcpy((table->users)+idx, user, sizeof(User_t));
     table->cache_map[idx] = 1;
     table->len++;
+    index_id[user->id] = 1;
+    ProfilerStop();
     return 1;
 }
 
@@ -88,7 +94,6 @@ int add_Like(Table_t *table, Like_t *like) {
 
     // Check id doesn't exist in the table
     if (index_id1.find(like->id1) != index_id1.end()) {
-        printf("aa\n");
         return 0;
     }
     

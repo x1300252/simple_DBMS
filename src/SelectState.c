@@ -4,12 +4,15 @@
 #include "Table.h"
 #include "SelectState.h"
 #include "WhereState.h"
+#include "JoinState.h"
 
 void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
     cmd->cmd_args.sel_args.fields = NULL;
     cmd->cmd_args.sel_args.fields_len = 0;
     cmd->cmd_args.sel_args.aggr_funcs = NULL;
     cmd->cmd_args.sel_args.funcs_len = 0;
+    cmd->cmd_args.sel_args.is_join = 0;
+    cmd->cmd_args.sel_args.table_flag = 0;
     cmd->cmd_args.sel_args.limit = -1;
     cmd->cmd_args.sel_args.offset = -1;
     cmd->cmd_args.sel_args.is_join = 0;
@@ -37,6 +40,7 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
         } else if (!strncmp(cmd->args[arg_idx], "from", 4)) {
             table_state_handler(table, cmd, arg_idx+1);
             return;
+<<<<<<< HEAD
         } else if (!strncmp(cmd->args[arg_idx], "join", 4 )) {
             if (!strncmp(cmd->args[arg_idx + 5], "id1", 3)) {
                 cmd->cmd_args.sel_args.is_join = 1;
@@ -45,6 +49,9 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
             }
         }
          else {
+=======
+        } else {
+>>>>>>> yx
             cmd->type = UNRECOG_CMD;
             return;
         }
@@ -55,16 +62,25 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
 }
 
 void table_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
-    size_t table_name_idx = arg_idx;
-    if (arg_idx < cmd->args_len
-            && (!strncmp(cmd->args[arg_idx], "user", 4)
-                || !strncmp(cmd->args[arg_idx], "like", 4)
-            )) {
+    if (arg_idx < cmd->args_len) {
+        if (!strncmp(cmd->args[arg_idx], "user", 4)) {
+            cmd->cmd_args.sel_args.table_flag = 1;
+        } else if (!strncmp(cmd->args[arg_idx], "like", 4)) {
+            cmd->cmd_args.sel_args.table_flag = 2;
+        } else {
+            cmd->type = UNRECOG_CMD;
+            return;
+        }
+
         arg_idx++;
         if (arg_idx == cmd->args_len) {
             return;
+        } else if (!strncmp(cmd->args[arg_idx], "join", 4)
+            && cmd->cmd_args.sel_args.table_flag == 1) {
+            join_state_handler(table, cmd, arg_idx+1);
+            return;
         } else if (!strncmp(cmd->args[arg_idx], "where", 5)
-            && !strncmp(cmd->args[table_name_idx], "user", 4)) {
+            && cmd->cmd_args.sel_args.table_flag == 1) {
             where_state_handler(table, cmd, arg_idx+1);
             return;
         } else if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
@@ -114,7 +130,7 @@ void limit_state_handler(Command_t *cmd, size_t arg_idx) {
 
 int aggr_func_count (Table_t *table, Command_t *cmd) {
     if (cmd->select_cols.idxListLen == -1) {
-        return table->len;
+        return (cmd->cmd_args.sel_args.table_flag == 1) ? table->len : table->len_like;
     } else {
         return cmd->select_cols.idxListLen;
     }
@@ -139,26 +155,48 @@ double aggr_func_avg (Table_t *table, Command_t *cmd, size_t idx) {
 int aggr_func_sum (Table_t *table, Command_t *cmd, size_t idx) {
     size_t i;
     int sum = 0;
-    if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id", 2)) {
-        if (cmd->select_cols.idxListLen == -1) {
-            for (i = 0; i < table->len; i++) {
-                sum += get_User(table, i)->id;
-            }
-        } else {
-            for (i = 0; i < cmd->select_cols.idxListLen; i++) {
-                sum += get_User(table, cmd->select_cols.idxList[i])->id;
+    if (cmd->cmd_args.sel_args.table_flag == 2) {
+        if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id1", 3)) {
+            for (i = 0; i < table->len_like; i++) {
+                sum += get_Like(table, i)->id1;
             }
         }
+        else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id2", 3)) {
+            for (i = 0; i < table->len_like; i++) {
+                sum += get_Like(table, i)->id2;
+            }
+        }
+        else {
+            cmd->type = UNRECOG_CMD;
+            return -1;
+        }
     }
-    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "age", 3)) {
-       if (cmd->select_cols.idxListLen == -1) {
-            for (i = 0; i < table->len; i++) {
-                sum += get_User(table, i)->age;
+    else if (cmd->cmd_args.sel_args.table_flag == 1) {
+        if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id", 2)) {
+            if (cmd->select_cols.idxListLen == -1) {
+                for (i = 0; i < table->len; i++) {
+                    sum += get_User(table, i)->id;
+                }
+            } else {
+                for (i = 0; i < cmd->select_cols.idxListLen; i++) {
+                    sum += get_User(table, cmd->select_cols.idxList[i])->id;
+                }
             }
-        } else {
-            for (i = 0; i < cmd->select_cols.idxListLen; i++) {
-                sum += get_User(table, cmd->select_cols.idxList[i])->age;
+        }
+        else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "age", 3)) {
+           if (cmd->select_cols.idxListLen == -1) {
+                for (i = 0; i < table->len; i++) {
+                    sum += get_User(table, i)->age;
+                }
+            } else {
+                for (i = 0; i < cmd->select_cols.idxListLen; i++) {
+                    sum += get_User(table, cmd->select_cols.idxList[i])->age;
+                }
             }
+        }
+        else {
+            cmd->type = UNRECOG_CMD;
+            return -1;
         }
     }
     else {

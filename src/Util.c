@@ -11,6 +11,7 @@
 #include "SelectState.h"
 #include "UpdateState.h"
 #include "DeleteState.h"
+#include "JoinState.h"
 
 ///
 /// Allocate State_t and initialize some attributes
@@ -285,18 +286,16 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(table, cmd, 1);
+    if (cmd->cmd_args.sel_args.is_join) {
+        count_join(table, cmd);
+    } 
     if (cmd->cmd_args.sel_args.funcs_len) {
         print_aggr_funcs(table, cmd);
-    }
-    else {
-        int table_name_idx = 0;
-        while(table_name_idx < cmd->args_len && strncmp(cmd->args[table_name_idx], "from", 4)) {
-            table_name_idx += 1;
-        }
-        if (!strncmp(cmd->args[table_name_idx+1], "user", 4)) {
+    } else {
+        if (cmd->cmd_args.sel_args.table_flag == 1) {
             print_users(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
         }
-        else if (!strncmp(cmd->args[table_name_idx+1], "like", 4)) {
+        else if (cmd->cmd_args.sel_args.table_flag == 2) {
             print_likes(table, cmd->select_cols.idxList, cmd->select_cols.idxListLen, cmd);
         }
     }

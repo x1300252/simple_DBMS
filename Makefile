@@ -13,7 +13,7 @@ CXX=g++
 TEST_SRC_DIR=test
 TEST_SRC=$(wildcard $(TEST_SRC_DIR)/*_test.c)
 TEST=test/all_test
-TEST_FLAGS=-lgtest -pthread -std=c++11 -I$(TEST_SRC_DIR)/include
+TEST_FLAGS=-lgtest -pthread -std=c++11 -I$(TEST_SRC_DIR)/include -Os
 TEST_UTIL=$(wildcard $(TEST_SRC_DIR)/*_Util.c)
 TEST_UTIL_INCLUE=$(wildcard $(TEST_SRC_DIR)/include/*.h)
 
