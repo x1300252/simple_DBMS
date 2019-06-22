@@ -12,6 +12,7 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
     cmd->cmd_args.sel_args.aggr_funcs = NULL;
     cmd->cmd_args.sel_args.funcs_len = 0;
     cmd->cmd_args.sel_args.is_join = 0;
+    cmd->cmd_args.sel_args.table_flag = 0;
     cmd->cmd_args.sel_args.limit = -1;
     cmd->cmd_args.sel_args.offset = -1;
     while(arg_idx < cmd->args_len) {
@@ -49,19 +50,25 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
 }
 
 void table_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
-    size_t table_name_idx = arg_idx;
-    if (arg_idx < cmd->args_len
-            && (!strncmp(cmd->args[arg_idx], "user", 4)
-                || !strncmp(cmd->args[arg_idx], "like", 4)
-            )) {
+    if (arg_idx < cmd->args_len) {
+        if (!strncmp(cmd->args[arg_idx], "user", 4)) {
+            cmd->cmd_args.sel_args.table_flag = 1;
+        } else if (!strncmp(cmd->args[arg_idx], "like", 4)) {
+            cmd->cmd_args.sel_args.table_flag = 2;
+        } else {
+            cmd->type = UNRECOG_CMD;
+            return;
+        }
+
         arg_idx++;
         if (arg_idx == cmd->args_len) {
             return;
         } else if (!strncmp(cmd->args[arg_idx], "join", 4)
-            && !strncmp(cmd->args[table_name_idx], "user", 4)) {
+            && cmd->cmd_args.sel_args.table_flag == 1) {
             join_state_handler(table, cmd, arg_idx+1);
+            return;
         } else if (!strncmp(cmd->args[arg_idx], "where", 5)
-            && !strncmp(cmd->args[table_name_idx], "user", 4)) {
+            && cmd->cmd_args.sel_args.table_flag == 1) {
             where_state_handler(table, cmd, arg_idx+1);
             return;
         } else if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
