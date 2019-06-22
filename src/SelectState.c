@@ -118,7 +118,7 @@ void limit_state_handler(Command_t *cmd, size_t arg_idx) {
 
 int aggr_func_count (Table_t *table, Command_t *cmd) {
     if (cmd->select_cols.idxListLen == -1) {
-        return table->len;
+        return (cmd->cmd_args.sel_args.table_flag == 1) ? table->len : table->len_like;
     } else {
         return cmd->select_cols.idxListLen;
     }
@@ -163,6 +163,16 @@ int aggr_func_sum (Table_t *table, Command_t *cmd, size_t idx) {
             for (i = 0; i < cmd->select_cols.idxListLen; i++) {
                 sum += get_User(table, cmd->select_cols.idxList[i])->age;
             }
+        }
+    }
+    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id1", 3)) {
+        for (i = 0; i < table->len_like; i++) {
+            sum += get_Like(table, i)->id1;
+        }
+    }
+    else if (!strncmp(cmd->cmd_args.sel_args.fields[idx], "id2", 3)) {
+        for (i = 0; i < table->len_like; i++) {
+            sum += get_Like(table, i)->id2;
         }
     }
     else {
