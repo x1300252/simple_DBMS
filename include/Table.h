@@ -8,9 +8,6 @@
 
 #define INIT_TABLE_SIZE 10000
 #define EXT_LEN 500
-
-std::unordered_map<unsigned int, int> index_id1;
-std::unordered_map<unsigned int, int> index_id2;
     
 typedef struct Table {
     size_t capacity;

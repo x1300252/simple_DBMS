@@ -3,13 +3,16 @@
 #include <sys/stat.h>
 #include "Table.h"
 
+std::unordered_map<unsigned int, int> index_id1;
+std::unordered_map<unsigned int, int> index_id2;
+
 ///
 /// Allocate a Table_t struct, then initialize some attributes, and
 /// load table if the `file_name` is given
 ///
 Table_t *new_Table(char *file_name) {
     Table_t *table = (Table_t*)malloc(sizeof(Table_t));
-    // memset((void*)table, 0, sizeof(Table_t));
+    memset((void*)table, 0, sizeof(Table_t));
     table->capacity = INIT_TABLE_SIZE;
     table->len = 0;
     table->users = (User_t*)malloc(
@@ -88,7 +91,6 @@ int add_Like(Table_t *table, Like_t *like) {
 
     // Check id doesn't exist in the table
     if (index_id1.find(like->id1) != index_id1.end()) {
-        printf("aa\n");
         return 0;
     }
     

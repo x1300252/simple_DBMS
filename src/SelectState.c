@@ -4,12 +4,14 @@
 #include "Table.h"
 #include "SelectState.h"
 #include "WhereState.h"
+#include "JoinState.h"
 
 void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
     cmd->cmd_args.sel_args.fields = NULL;
     cmd->cmd_args.sel_args.fields_len = 0;
     cmd->cmd_args.sel_args.aggr_funcs = NULL;
     cmd->cmd_args.sel_args.funcs_len = 0;
+    cmd->cmd_args.sel_args.is_join = 0;
     cmd->cmd_args.sel_args.limit = -1;
     cmd->cmd_args.sel_args.offset = -1;
     while(arg_idx < cmd->args_len) {
@@ -36,8 +38,7 @@ void field_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
         } else if (!strncmp(cmd->args[arg_idx], "from", 4)) {
             table_state_handler(table, cmd, arg_idx+1);
             return;
-        }
-         else {
+        } else {
             cmd->type = UNRECOG_CMD;
             return;
         }
@@ -56,7 +57,11 @@ void table_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
         arg_idx++;
         if (arg_idx == cmd->args_len) {
             return;
-        } else if (!strncmp(cmd->args[arg_idx], "where", 5)
+        } else if (!strncmp(cmd->args[arg_idx], "join", 4)
+            && !strncmp(cmd->args[table_name_idx], "user", 4)) {
+            join_state_handler(cmd, arg_idx+1);
+        }
+        if (!strncmp(cmd->args[arg_idx], "where", 5)
             && !strncmp(cmd->args[table_name_idx], "user", 4)) {
             where_state_handler(table, cmd, arg_idx+1);
             return;

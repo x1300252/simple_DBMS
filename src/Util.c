@@ -11,6 +11,7 @@
 #include "SelectState.h"
 #include "UpdateState.h"
 #include "DeleteState.h"
+#include "JoinState.h"
 
 ///
 /// Allocate State_t and initialize some attributes
@@ -285,6 +286,9 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(table, cmd, 1);
+    if (cmd->cmd_args.sel_args.is_join) {
+        count_join(table, cmd);
+    }
     if (cmd->cmd_args.sel_args.funcs_len) {
         print_aggr_funcs(table, cmd);
     }
