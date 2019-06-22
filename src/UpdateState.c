@@ -55,21 +55,23 @@ void update_id_handler(Table_t *table, SelectCols_t select_cols, int new_id) {
     size_t idx;
     User_t *usr_ptr;
     
+    extern std::unordered_map<unsigned int, int> index_id;
     // Check id doesn't exist in the table
-    for (idx = 0; idx < table->len; idx++) {
-        usr_ptr = get_User(table, idx);
-        if (usr_ptr->id == new_id) {
-            return;
-        }
+    if (index_id.find(new_id) != index_id.end()) {
+        return ;
     }
     
     if (select_cols.idxListLen == -1 && table->len == 1) {
         usr_ptr = get_User(table, 0);
+        index_id.erase (usr_ptr->id);
         usr_ptr->id = new_id;
+        index_id[new_id] = 1;
     }
     else if (select_cols.idxListLen == 1) {
         usr_ptr = get_User(table, select_cols.idxList[0]);
+        index_id.erase (usr_ptr->id);
         usr_ptr->id = new_id;
+        index_id[new_id] = 1;
     }
 }
 

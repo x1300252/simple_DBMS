@@ -41,6 +41,8 @@ void delete_state_handler(Table_t *table, Command_t *cmd) {
 }
 
 void delete_col(Table_t *table, int idx) {
+    extern std::unordered_map<unsigned int, int> index_id;
+    index_id.erase(table->users[idx].id);
     for (; idx < table->len-1; idx++) {
         table->users[idx] = table->users[idx+1];
     }
@@ -49,6 +51,8 @@ void delete_col(Table_t *table, int idx) {
 }
 
 void delete_all(Table_t *table) {
+    extern std::unordered_map<unsigned int, int> index_id;
     memset(table->users, 0, sizeof(User_t)*table->len);
     table->len = 0;
+    index_id.clear();
 }
