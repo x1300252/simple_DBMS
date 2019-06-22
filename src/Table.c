@@ -5,6 +5,7 @@
 
 std::unordered_map<unsigned int, int> index_id1;
 std::unordered_map<unsigned int, int> index_id2;
+std::unordered_map<unsigned int, int> index_id;
 
 ///
 /// Allocate a Table_t struct, then initialize some attributes, and
@@ -46,12 +47,10 @@ int add_User(Table_t *table, User_t *user) {
         return 0;
     }
     // Check id doesn't exist in the table
-    for (idx = 0; idx < table->len; idx++) {
-        usr_ptr = get_User(table, idx);
-        if (usr_ptr->id == user->id) {
-            return 0;
-        }
+    if (index_id.find(user->id) != index_id.end()) {
+        return 0;
     }
+    
     if (table->len == table->capacity) {
         User_t *new_user_buf = (User_t*)malloc(sizeof(User_t)*(table->len+EXT_LEN));
         unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->len+EXT_LEN));
@@ -72,6 +71,7 @@ int add_User(Table_t *table, User_t *user) {
     memcpy((table->users)+idx, user, sizeof(User_t));
     table->cache_map[idx] = 1;
     table->len++;
+    index_id[user->id] = 1;
     return 1;
 }
 

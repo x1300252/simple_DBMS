@@ -37,16 +37,11 @@ void print_prompt(State_t *state) {
 ///
 void print_user(User_t *user, SelectArgs_t *sel_args) {
     size_t idx;
-    if (!strncmp(sel_args->fields[idx], "*", 1)) {
-        printf("(");
-        for (idx = 0; idx < sel_args->fields_len; idx++) {
+    printf("(");
+    for (idx = 0; idx < sel_args->fields_len; idx++) {
+        if (!strncmp(sel_args->fields[idx], "*", 1)) {
             printf("%d, %s, %s, %d", user->id, user->name, user->email, user->age);
-        }
-        printf(")\n");
-    }
-    else  {
-        printf("(");
-        for (idx = 0; idx < sel_args->fields_len; idx++) {
+        } else {
             if (idx > 0) printf(", ");
 
             if (!strncmp(sel_args->fields[idx], "id", 2)) {
@@ -59,8 +54,8 @@ void print_user(User_t *user, SelectArgs_t *sel_args) {
                 printf("%d", user->age);
             }
         }
-        printf(")\n");
     }
+    printf(")\n");
 }
 
 ///
