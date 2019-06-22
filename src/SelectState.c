@@ -59,9 +59,8 @@ void table_state_handler(Table_t *table, Command_t *cmd, size_t arg_idx) {
             return;
         } else if (!strncmp(cmd->args[arg_idx], "join", 4)
             && !strncmp(cmd->args[table_name_idx], "user", 4)) {
-            join_state_handler(cmd, arg_idx+1);
-        }
-        if (!strncmp(cmd->args[arg_idx], "where", 5)
+            join_state_handler(table, cmd, arg_idx+1);
+        } else if (!strncmp(cmd->args[arg_idx], "where", 5)
             && !strncmp(cmd->args[table_name_idx], "user", 4)) {
             where_state_handler(table, cmd, arg_idx+1);
             return;

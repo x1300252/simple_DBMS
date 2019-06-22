@@ -288,11 +288,10 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
     field_state_handler(table, cmd, 1);
     if (cmd->cmd_args.sel_args.is_join) {
         count_join(table, cmd);
-    }
+    } 
     if (cmd->cmd_args.sel_args.funcs_len) {
         print_aggr_funcs(table, cmd);
-    }
-    else {
+    } else {
         int table_name_idx = 0;
         while(table_name_idx < cmd->args_len && strncmp(cmd->args[table_name_idx], "from", 4)) {
             table_name_idx += 1;
