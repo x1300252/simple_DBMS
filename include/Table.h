@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #define INIT_TABLE_SIZE 10000
-#define EXT_LEN 500
+#define EXT_LEN 10000
     
 typedef struct Table {
     size_t capacity;
