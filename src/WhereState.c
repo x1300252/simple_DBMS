@@ -51,6 +51,8 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     int result;
     int l_val;
     int r_val;
+    char * l_str;
+    char * r_str;
     int idx;
     
     cmd->select_cols.idxListLen = 0;
@@ -72,6 +74,7 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     else if (!strncmp(cmd->args[arg_idx], "name", 2)
             || !strncmp(cmd->args[arg_idx], "email", 3)) {
         l_str_ope = get_str_ope(cmd->args[arg_idx+1]);
+        l_str = cmd->args[arg_idx+2];
     }
     
     if (!l_int_ope && !l_str_ope) {
@@ -88,24 +91,40 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     }
     
     if (bit_ope == NULL) {
-        for (idx = 0; idx < table->len; idx++) {
-            if (!strcmp("id", cmd->args[arg_idx])) {
+        if (!strcmp("id", cmd->args[arg_idx])) {
+            for (idx = 0; idx < table->len; idx++) {
                 result = l_int_ope(table->users[idx].id, l_val);
+                if (result) {
+                    cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                    cmd->select_cols.idxListLen++;
+                }
             }
-            else if (!strcmp("name", cmd->args[arg_idx])) {
-                result = l_str_ope(table->users[idx].name, cmd->args[arg_idx+2]);
+        }
+        else if (!strcmp("name", cmd->args[arg_idx])) {
+            for (idx = 0; idx < table->len; idx++) {
+                result = l_str_ope(table->users[idx].name, l_str);
+                if (result) {
+                    cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                    cmd->select_cols.idxListLen++;
+                }
             }
-            else if (!strcmp("email", cmd->args[arg_idx])) {
-                result = l_str_ope(table->users[idx].email, cmd->args[arg_idx+2]);
+        }
+        else if (!strcmp("email", cmd->args[arg_idx])) {
+            for (idx = 0; idx < table->len; idx++) {
+                result = l_str_ope(table->users[idx].email, l_str);
+                if (result) {
+                    cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                    cmd->select_cols.idxListLen++;
+                }
             }
-            else if (!strcmp("age", cmd->args[arg_idx])) {
+        }
+        else if (!strcmp("age", cmd->args[arg_idx])) {
+            for (idx = 0; idx < table->len; idx++) {
                 result = l_int_ope(table->users[idx].age, l_val);
-            }
-            //printf("%d %d\n", idx, result);
-            
-            if (result) {
-                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
-                cmd->select_cols.idxListLen++;
+                if (result) {
+                    cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                    cmd->select_cols.idxListLen++;
+                }
             }
         }
         arg_idx += 3;
@@ -116,6 +135,7 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
 
         r_int_ope = NULL;
         r_str_ope = NULL;
+        
         if (!strncmp(cmd->args[r_arg], "id", 2)
                 || !strncmp(cmd->args[r_arg], "age", 3)) {
             r_val = atoi(cmd->args[r_arg+2]);
@@ -124,6 +144,7 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
         else if (!strncmp(cmd->args[r_arg], "name", 2)
                 || !strncmp(cmd->args[r_arg], "email", 3)) {
             r_str_ope = get_str_ope(cmd->args[r_arg+1]);
+            r_str = cmd->args[r_arg+2];
         }
         
         if (!r_int_ope && !r_str_ope) {
@@ -131,40 +152,207 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
             return;
         }
         
-        for (idx = 0; idx < table->len; idx++) {
-            if (!strcmp("id", cmd->args[l_arg])) {
-                l_result = l_int_ope(table->users[idx].id, l_val);
-            }
-            else if (!strcmp("name", cmd->args[l_arg])) {
-                l_result = l_str_ope(table->users[idx].name, cmd->args[l_arg+2]);
-            }
-            else if (!strcmp("email", cmd->args[l_arg])) {
-                l_result = l_str_ope(table->users[idx].email, cmd->args[l_arg+2]);
-            }
-            else if (!strcmp("age", cmd->args[l_arg])) {
-                l_result = l_int_ope(table->users[idx].age, l_val);
-            }
-            
+        if (!strcmp("id", cmd->args[l_arg])) {
             if (!strcmp("id", cmd->args[r_arg])) {
-                r_result = r_int_ope(table->users[idx].id, r_val);
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].id, l_val);
+                    r_result = r_int_ope(table->users[idx].id, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
             }
             else if (!strcmp("name", cmd->args[r_arg])) {
-                r_result = r_str_ope(table->users[idx].name, cmd->args[r_arg+2]);
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].id, l_val);
+                    r_result = r_str_ope(table->users[idx].name, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
             }
             else if (!strcmp("email", cmd->args[r_arg])) {
-                r_result = r_str_ope(table->users[idx].email, cmd->args[r_arg+2]);
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].id, l_val);
+                    r_result = r_str_ope(table->users[idx].email, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
             }
             else if (!strcmp("age", cmd->args[r_arg])) {
-                r_result = r_int_ope(table->users[idx].age, r_val);
-            }
-            
-            result = bit_ope(l_result, r_result);
-            //printf("%d %d %d %d\n", idx, l_result, r_result, result);
-            if (result) {
-                cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
-                cmd->select_cols.idxListLen++;
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].id, l_val);
+                    r_result = r_int_ope(table->users[idx].age, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
             }
         }
+        else if (!strcmp("name", cmd->args[l_arg])) {
+            if (!strcmp("id", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].name, l_str);
+                    r_result = r_int_ope(table->users[idx].id, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("name", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].name, l_str);
+                    r_result = r_str_ope(table->users[idx].name, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("email", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].name, l_str);
+                    r_result = r_str_ope(table->users[idx].email, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("age", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].name, l_str);
+                    r_result = r_int_ope(table->users[idx].age, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+        }
+        else if (!strcmp("email", cmd->args[l_arg])) {
+            if (!strcmp("id", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].email, l_str);
+                    r_result = r_int_ope(table->users[idx].id, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("name", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].email, l_str);
+                    r_result = r_str_ope(table->users[idx].name, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("email", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].email, l_str);
+                    r_result = r_str_ope(table->users[idx].email, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("age", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_str_ope(table->users[idx].email, l_str);
+                    r_result = r_int_ope(table->users[idx].age, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+        }
+        else if (!strcmp("age", cmd->args[l_arg])) {
+            if (!strcmp("id", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].age, l_val);
+                    r_result = r_int_ope(table->users[idx].id, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("name", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].age, l_val);
+                    r_result = r_str_ope(table->users[idx].name, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("email", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].age, l_val);
+                    r_result = r_str_ope(table->users[idx].email, r_str);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+            else if (!strcmp("age", cmd->args[r_arg])) {
+                for (idx = 0; idx < table->len; idx++) {
+                    l_result = l_int_ope(table->users[idx].age, l_val);
+                    r_result = r_int_ope(table->users[idx].age, r_val);
+                    result = bit_ope(l_result, r_result);
+                    //printf("%d %d %d %d\n", idx, l_result, r_result, result);
+                    if (result) {
+                        cmd->select_cols.idxList[cmd->select_cols.idxListLen] = idx;
+                        cmd->select_cols.idxListLen++;
+                    }
+                }
+            }
+        }
+        
         arg_idx += 7;
     }
     if (arg_idx < cmd->args_len) {

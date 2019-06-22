@@ -3,7 +3,6 @@
 #include "User.h"
 #include "Command.h"
 
-const int USER_INSERT_OFFSET = 2;
 ///
 /// Allocate new space for User_t
 /// The caller should free the allocated space
@@ -25,13 +24,13 @@ User_t* command_to_User(Command_t *cmd) {
     if (!user || !cmd) {
         return NULL;
     }
-    if (cmd->args_len != (5+USER_INSERT_OFFSET)) {
+    if (cmd->args_len != (7)) {
         return NULL;
     }
-    user->id = atoi(cmd->args[1+USER_INSERT_OFFSET]);
-    strncpy(user->name, cmd->args[2+USER_INSERT_OFFSET], MAX_USER_NAME);
-    strncpy(user->email, cmd->args[3+USER_INSERT_OFFSET], MAX_USER_EMAIL);
-    user->age = atoi(cmd->args[4+USER_INSERT_OFFSET]);
+    user->id = atoi(cmd->args[3]);
+    strncpy(user->name, cmd->args[4], MAX_USER_NAME);
+    strncpy(user->email, cmd->args[5], MAX_USER_EMAIL);
+    user->age = atoi(cmd->args[6]);
     return user;
 }
 
