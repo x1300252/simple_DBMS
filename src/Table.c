@@ -42,7 +42,6 @@ Table_t *new_Table(char *file_name) {
 ///
 int add_User(Table_t *table, User_t *user) {
     size_t idx;
-    User_t *usr_ptr;
     if (!table || !user) {
         return 0;
     }
@@ -83,7 +82,6 @@ int add_User(Table_t *table, User_t *user) {
 ///
 int add_Like(Table_t *table, Like_t *like) {
     size_t idx;
-    Like_t *like_ptr;
     if (!table || !like) {
         return 0;
     }

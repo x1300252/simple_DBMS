@@ -52,7 +52,6 @@ void update_state_handler(Table_t *table, Command_t *cmd) {
 }
 
 void update_id_handler(Table_t *table, SelectCols_t select_cols, int new_id) {
-    size_t idx;
     User_t *usr_ptr;
     
     extern std::unordered_map<unsigned int, int> index_id;

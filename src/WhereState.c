@@ -49,11 +49,11 @@ void where_state_handler(Table_t *table, Command_t *cmd, int arg_idx) {
     int l_result;
     int r_result;
     int result;
-    int l_val;
-    int r_val;
-    char * l_str;
-    char * r_str;
-    int idx;
+    int l_val = 0;
+    int r_val = 0;
+    char *l_str = NULL;
+    char *r_str = NULL;
+    size_t idx;
     
     cmd->select_cols.idxListLen = 0;
     cmd->select_cols.idxList = (int*)malloc(sizeof(int) * table->len);
